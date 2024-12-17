@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   AppBar,
@@ -11,15 +11,15 @@ import {
   Box,
 } from "@mui/material";
 import axios from "axios";
-import { Search as SearchIcon, AccountCircle } from "@mui/icons-material";
+import { AccountCircle } from "@mui/icons-material";
 import { info } from "./TokenGet";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { useDebounce } from "use-debounce";
+import { searchResultsContext } from "./Layout";
 
-function Header({ setSearchResults }) {
+function Header() {
+  const { setSearchResults } = useContext(searchResultsContext);
   const [anchorEl, setAnchorEl] = useState(null);
-  
   const [query, setQuery] = useState("");
   const [debouncedQuery] = useDebounce(query, 1000); // Debounce query state (1000ms delay)
   const navigate = useNavigate();
@@ -29,6 +29,7 @@ function Header({ setSearchResults }) {
   const handleMenuClose = () => setAnchorEl(null);
 
   const handleLogout = () => {
+    localStorage.removeItem("userInfo");
     navigate("/login");
     window.location.href = "/login";
   };
@@ -38,15 +39,11 @@ function Header({ setSearchResults }) {
       axios
         .get(`/api/products/search/?query=${debouncedQuery}`, {
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${info.token}`,
           },
         })
         .then((response) => {
-          console.log(response.data);
-          console.log("Search API Response:", response.data);
-          setSearchResults(response.data);
-          console.log("HArsh Shah",);
+          setSearchResults(response.data); // Update search results in context
         })
         .catch((error) => {
           console.error("Error fetching products:", error);
@@ -55,6 +52,8 @@ function Header({ setSearchResults }) {
             theme: "dark",
           });
         });
+    } else {
+      setSearchResults([]); // Reset search results if query is empty
     }
   }, [debouncedQuery, setSearchResults]);
 
@@ -135,9 +134,6 @@ function Header({ setSearchResults }) {
               borderRadius: 1,
             }}
           />
-          {/* <IconButton color="inherit" >
-              <SearchIcon />
-            </IconButton> */}
         </Box>
       </Toolbar>
     </AppBar>
