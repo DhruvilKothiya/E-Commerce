@@ -72,7 +72,7 @@ function ProductScreen({ params }) {
             <Typography variant="body2">
               Description: {product.productinfo}
             </Typography>
-          </Grid>
+          </Grid> 
 
           <Grid item md={3} xs={12}>
             <Card sx={{ padding: 2 }}>

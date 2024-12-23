@@ -35,7 +35,7 @@ function LoginScreen() {
 
   const onSubmit = async (data) => {
     await dispatch(loginUser(data));
-    // navigate('/')
+    navigate('/')
     window.location.href = '/'
     
   };
