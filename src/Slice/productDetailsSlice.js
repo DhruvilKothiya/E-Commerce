@@ -8,9 +8,8 @@ export const fetchProductDetails = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const config = {
-        headers: {
-          
-          Authorization: `Bearer ${info.token}`
+        headers: {          
+          Authorization: `Bearer ${info.access}`
         }
       }
       const { data } = await axios.get(`/api/product/${id}`,config);

@@ -39,7 +39,7 @@ function Header() {
       axios
         .get(`/api/products/search/?query=${debouncedQuery}`, {
           headers: {
-            Authorization: `Bearer ${info.token}`,
+            Authorization: `Bearer ${info.access}`,
           },
         })
         .then((response) => {

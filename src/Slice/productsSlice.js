@@ -9,10 +9,11 @@ export const fetchProducts = createAsyncThunk(
     try {
       const config = {
         headers: {
-          Authorization: `Bearer ${info.token}`
+          Authorization: `Bearer ${info.access}`
         }
       }
       const { data } = await axios.get("/api/products/",config);
+      console.log("data",data)
       return data;
     } catch (error) {
       return rejectWithValue(
