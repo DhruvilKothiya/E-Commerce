@@ -28,7 +28,7 @@ function Sidebar() {
         boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
       }}
     >
-      <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+      <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold",pt:3 }}>
         Categories
       </Typography>
       <List component="nav">
