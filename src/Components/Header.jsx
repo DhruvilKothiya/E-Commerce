@@ -11,17 +11,19 @@ import {
   Box,
 } from "@mui/material";
 import axios from "axios";
-import { AccountCircle } from "@mui/icons-material";
+import { AccountCircle, Menu as MenuIcon } from "@mui/icons-material";
 import { info } from "./TokenGet";
 import { toast } from "react-toastify";
 import { useDebounce } from "use-debounce";
 import { searchResultsContext } from "./Layout";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 function Header() {
   const { setSearchResults } = useContext(searchResultsContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const [query, setQuery] = useState("");
   const [debouncedQuery] = useDebounce(query, 1000); // Debounce query state (1000ms delay)
+  const isMobile = useMediaQuery("(max-width:768px)");
   const navigate = useNavigate();
   const auth = info;
 
@@ -60,14 +62,30 @@ function Header() {
   return (
     <AppBar position="static" sx={{ backgroundColor: "black" }}>
       <Toolbar>
-        <Typography
-          variant="h6"
-          component={Link}
-          to="/"
-          sx={{ color: "white", textDecoration: "none", flexGrow: 1 }}
-        >
-          Ecommerce Cart
-        </Typography>
+      {isMobile ? (
+          <IconButton
+            color="inherit"
+            aria-label="menu"
+            sx={{ marginRight: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+        ) : (
+          <Typography
+            component={Link}
+            to="/"
+            sx={{
+              color: "white",
+              textDecoration: "none",
+              flexGrow: 1,
+              display: "inline-block",
+              fontSize: "1.5rem",
+              fontWeight: "bold",
+            }}
+          >
+            Ecommerce Cart
+          </Typography>
+        )}
 
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Typography
