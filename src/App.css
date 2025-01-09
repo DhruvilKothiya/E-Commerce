@@ -1,18 +1,45 @@
-p{
-    margin: auto;
+/* @media (min-width: 768px) {
+    .box-style{
+        display:flex;
+        justify-content: space-between;
+
+    }
+    .box{
+        width: max-content;
+        display: flex;
+        justify-content: space-between;
+    }
 }
 
-.css-6numsx-MuiContainer-root {
-    /* width: 100%;
-    margin-left: auto;
-    box-sizing: border-box;
-    margin-right: auto;
-    padding-left: 16px;
-    padding-right: 16px;
-    margin-top: 24px; */
-    width: 100% !important;
+@media (min-width: 992px) {
+    .box{
+        width: max-content;
+        display: flex;
+        justify-content: space-between;
+    }
+}*/
+/* @media(min-width: 992px) {
+
 }
 
-.MuiDialogTitle-root+.css-kw13he-MuiDialogContent-root {
-    padding-top: 5px !important;
+@media (min-width: 1440px) {
+    
+} */
+
+@media(min-width: 600px) {
+}
+
+@media (min-width: 1200px) {
+    .container{
+        max-width: auto !important
+    }
+}
+
+@media(min-width: 760px) {
+    .product-detail{
+        display: flex;
+        justify-content:center;
+        gap: 30px;
+        padding: 40px;
+    }
 }
