@@ -16,8 +16,8 @@ function Product({ product }) {
   return (
     <Box
       sx={{
-        maxWidth: 300,
-        padding: 2,
+        // maxWidth: 300,
+        // padding: 2,
         borderRadius: 2,
         boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
         position: "relative",
@@ -36,7 +36,11 @@ function Product({ product }) {
           height="200"
           image={"http://localhost:8000"+product?.images[0]?.image}
           alt={product.productname}
-          sx={{ borderRadius: 2 }}
+          sx={{
+            borderRadius: 2,
+            backgroundSize: "contain",
+            objectFit: "contain",
+          }}
         />
       </Link>
 

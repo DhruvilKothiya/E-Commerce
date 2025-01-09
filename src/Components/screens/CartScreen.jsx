@@ -1,33 +1,41 @@
 import React, { useEffect } from "react";
-import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { addToCart, removeFromCart } from "../../Slice/cartSlice"; // Adjust path
+import {
+  fetchProductDetails,
+  removeFromCart,
+  updateCartQuantity,
+} from "../../Slice/cartSlice";
 import {
   Container,
   Grid,
-  Card,
-  CardContent,
   Typography,
   Button,
   IconButton,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  ImageListItem,
-  ImageListItemBar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  Link,
 } from "@mui/material";
+import { Delete as DeleteIcon, Add, Remove } from "@mui/icons-material";
 
 function CartScreen() {
   const { id } = useParams();
+  const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const qty = location.search ? Number(location.search.split("=")[1]) : 1;
-  const { cartItems } = useSelector((state) => state.cart );
+
+  const { cartItems, loading, error } = useSelector((state) => state.cart);
+
   useEffect(() => {
     if (id) {
-      dispatch(addToCart({ product: id, qty }));
+      dispatch(fetchProductDetails(id));
     }
   }, [dispatch, id, qty]);
 
@@ -35,77 +43,115 @@ function CartScreen() {
     dispatch(removeFromCart(id));
   };
 
+  const incrementQty = (id, currentQty) => {
+    dispatch(updateCartQuantity({ id, qty: currentQty + 1 }));
+  };
+
+  const decrementQty = (id, currentQty) => {
+    if (currentQty > 1) {
+      dispatch(updateCartQuantity({ id, qty: currentQty - 1 }));
+    }
+  };
+
   const checkoutHandler = () => {
     navigate("/login?redirect=shipping");
   };
 
+  const calculateSubtotal = () =>
+    cartItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2);
+
   return (
     <Container sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Cart Items
+        Shopping Cart
       </Typography>
-      {cartItems.length === 0 ? (
-        <Typography variant="body1">
+      {loading ? (
+        <Typography>Loading...</Typography>
+      ) : error ? (
+        <Typography color="error">{error}</Typography>
+      ) : cartItems.length === 0 ? (
+        <Typography>
           Your cart is empty. <Link to="/">Go Back</Link>
         </Typography>
       ) : (
-        <Grid container spacing={3}>
-          {cartItems.map((item) => (
-            <Grid item md={8} xs={12} key={item.product}>
-              <Card sx={{ display: "flex", mb: 2 }}>
-                <ImageListItem sx={{ width: 100, height: 100 }}>
-                  <img src={item.image} alt={item.productname} loading="lazy" />
-                  <ImageListItemBar title={item.productname} />
-                </ImageListItem>
-                <CardContent sx={{ flex: 1 }}>
-                  <Typography variant="h6">{item.productname}</Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    Rs. {item.price}
-                  </Typography>
-                  <FormControl fullWidth sx={{ mt: 2 }}>
-                    <InputLabel>Quantity</InputLabel>
-                    <Select
-                      value={item.qty}
-                      onChange={(e) =>
-                        dispatch(
-                          addToCart({
-                            product: item.product,
-                            qty: Number(e.target.value),
-                          })
-                        )
-                      }
-                      label="Quantity"
-                    >
-                      {[...Array(item.stockcount).keys()].map((x) => (
-                        <MenuItem key={x + 1} value={x + 1}>
-                          {x + 1}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <IconButton
-                    color="secondary"
-                    onClick={() => removeFromCartHandler(item.product)}
-                    sx={{ mt: 1 }}
-                  >
-                    <i className="fas fa-trash"></i>
-                  </IconButton>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={8}>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Product</TableCell>
+                    <TableCell align="center">Quantity</TableCell>
+                    <TableCell align="center">Total</TableCell>
+                    <TableCell align="center">Remove</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {cartItems.map((item) => (
+                    <TableRow key={item.product}>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <img
+                            src={item.image}
+                            alt={item.productname}
+                            style={{ width: 60, height: 60, marginRight: 16 }}
+                          />
+                          <Typography>{item.productname}</Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <IconButton
+                            color="primary"
+                            onClick={() => decrementQty(item.product, item.qty)}
+                          >
+                            <Remove />
+                          </IconButton>
+                          <Typography sx={{ mx: 2 }}>{item.qty}</Typography>
+                          <IconButton
+                            color="primary"
+                            onClick={() => incrementQty(item.product, item.qty)}
+                          >
+                            <Add />
+                          </IconButton>
+                        </Box>
+                      </TableCell>
+                      <TableCell align="center">
+                        Rs. {(item.price * item.qty).toFixed(2)}
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          color="error"
+                          onClick={() => removeFromCartHandler(item.product)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Cart Total
+              </Typography>
+              <Typography>Subtotal: Rs. {calculateSubtotal()}</Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={checkoutHandler}
+                disabled={cartItems.length === 0}
+              >
+                Proceed to Checkout
+              </Button>
+            </Paper>
+          </Grid>
         </Grid>
       )}
-      <Grid container justifyContent="center" sx={{ mt: 2 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={checkoutHandler}
-          disabled={cartItems.length === 0}
-        >
-          Proceed to Checkout
-        </Button>
-      </Grid>
     </Container>
   );
 }
