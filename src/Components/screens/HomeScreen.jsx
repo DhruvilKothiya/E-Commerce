@@ -1,11 +1,21 @@
-import React, { useContext, useEffect } from "react";
-import { Container, Grid, Typography, Box } from "@mui/material";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  Box,
+  Container,
+  Grid,
+  IconButton,
+  CssBaseline,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "../Loader";
 import Message from "../Message";
 import Product from "../Products";
 import { fetchProducts } from "../../Slice/productsSlice";
 import { searchResultsContext } from "../Layout";
+import Sidebar from "../Sidebar";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import Drawer from "@mui/material/Drawer";
 
 function HomeScreen() {
   const { searchResults } = useContext(searchResultsContext);
@@ -13,46 +23,71 @@ function HomeScreen() {
   const { products, loading, error } = useSelector(
     (state) => state.productsList
   );
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const isMobile = useMediaQuery("(max-width:768px)");
 
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
+  const toggleDrawer = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+
   const displayedProducts = searchResults.length > 0 ? searchResults : products;
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Products
-      </Typography>
-
-      <Box
-        sx={{
-          backgroundColor: "#f5f5f5",
-          padding: "10px",
-          borderRadius: "5px",
-          marginBottom: "20px",
-        }}
-      >
-        <Typography variant="body1" color="text.secondary">
-          This Course is free & valid only on ARKPROCODER YouTube channel
-        </Typography>
-      </Box>
-
-      {loading ? (
-        <Loader />
-      ) : error ? (
-        <Message variant="danger">{error}</Message>
+    <Box sx={{ mt: 4, display: "flex" }}>
+      <CssBaseline />
+      {/* Conditional Sidebar Drawer */}
+      {isMobile ? (
+        <>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={toggleDrawer}
+            sx={{ position: "fixed", top: 5, left: 16, zIndex: 1300 }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Drawer
+            open={drawerOpen}
+            onClose={toggleDrawer}
+            anchor="left"
+            sx={{
+              "& .MuiDrawer-paper": {
+                width: 250,
+                paddingLeft: "10px",
+              },
+            }}
+          >
+            <Sidebar />
+          </Drawer>
+        </>
       ) : (
-        <Grid container spacing={3}>
-          {displayedProducts.map((product) => (
-            <Grid item key={product._id} xs={12} sm={6} md={4} lg={3}>
-              <Product product={product} />
-            </Grid>
-          ))}
-        </Grid>
+        <Box sx={{pr: 2 }}>
+          <Sidebar />
+        </Box>
       )}
-    </Container>
+
+      {/* Product List */}
+      <Container maxWidth="false" sx={{ flexGrow: 1 }}>
+        {loading ? (
+          <Loader />
+        ) : error ? (
+          <Message variant="danger">{error}</Message>
+        ) : (
+          <Grid container spacing={3}>
+            {displayedProducts.map((product) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
+                <Product product={product} />
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </Container>
+    </Box>
   );
 }
 
