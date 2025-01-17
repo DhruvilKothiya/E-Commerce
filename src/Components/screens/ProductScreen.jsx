@@ -22,6 +22,8 @@ import "slick-carousel/slick/slick-theme.css";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PaymentIcon from "@mui/icons-material/Payment";
 import Message from "../Message";
+import { info } from "../TokenGet";
+import axios from "axios";
 import { fetchProductDetails } from "../../Slice/productDetailsSlice";
 
 function ProductScreen() {
@@ -40,8 +42,39 @@ function ProductScreen() {
     dispatch(fetchProductDetails(id));
   }, [dispatch, id]);
 
-  const addToCartHandler = () => {
+  const addToCartHandler = async () => {
+    try {
+      const data = {
+        cart_id: id,
+        product_id: id,
+        qty,
+      };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${info.access}`,
+        },
+      };
+      const cart = await axios.post("/api/cart/add/",data,config);
+      alert("Added to cart successfully!");
+      console.log("Cart Response:", cart);
+    } catch (error) {
+      console.error("Add to Cart Error:", error);
+      alert("Failed to add to cart. Please try again."); 
+    }
     navigate(`/cart/${id}?qty=${qty}`);
+  };
+
+  const incrementQty = () => {
+    if (qty < product.stockcount) {
+      setQty(qty + 1);
+    }
+  };
+
+  const decrementQty = () => {
+    if (qty > 1) {
+      setQty(qty - 1);
+    }
   };
 
   const handleBuyNow = () => {
@@ -236,20 +269,30 @@ function ProductScreen() {
                 Status: {product.stockcount > 0 ? "In Stock" : "Out of Stock"}
               </Typography>
               {product.stockcount > 0 && (
-                <FormControl fullWidth sx={{ mb: 2 }}>
-                  <InputLabel>Qty</InputLabel>
-                  <Select
-                    value={qty}
-                    onChange={(e) => setQty(Number(e.target.value))}
-                    label="Qty"
+                <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={decrementQty}
+                    disabled={qty <= 1}
                   >
-                    {[...Array(product.stockcount).keys()].map((x) => (
-                      <MenuItem key={x + 1} value={x + 1}>
-                        {x + 1}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                    -
+                  </Button>
+                  <Typography
+                    sx={{ mx: 2, minWidth: "2rem", textAlign: "center" }}
+                    variant="h6"
+                  >
+                    {qty}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={incrementQty}
+                    disabled={qty >= product.stockcount}
+                  >
+                    +
+                  </Button>
+                </Box>
               )}
               <Button
                 variant="contained"
