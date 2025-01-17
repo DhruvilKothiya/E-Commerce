@@ -25,17 +25,21 @@ import {
 import { Delete as DeleteIcon, Add, Remove } from "@mui/icons-material";
 
 function CartScreen() {
-  const { id } = useParams();
-  const location = useLocation();
+  const { id } = useParams(); // Extract product ID from the URL
+  const location = useLocation(); // Access query string
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const qty = location.search ? Number(location.search.split("=")[1]) : 1;
+
+  // Extract qty from query string and set default to 1 if not provided
+  const qty = new URLSearchParams(`location`.search).getAll("qty")[0];
+  console.log({qty})
 
   const { cartItems, loading, error } = useSelector((state) => state.cart);
 
   useEffect(() => {
     if (id) {
       dispatch(fetchProductDetails(id));
+      console.log(`Product ID: ${id}, Quantity: ${qty}`);
     }
   }, [dispatch, id, qty]);
 
@@ -100,17 +104,27 @@ function CartScreen() {
                         </Box>
                       </TableCell>
                       <TableCell align="center">
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
                           <IconButton
                             color="primary"
-                            onClick={() => decrementQty(item.product, item.qty)}
+                            onClick={() =>
+                              decrementQty(item.product, item.qty)
+                            }
                           >
                             <Remove />
                           </IconButton>
-                          <Typography sx={{ mx: 2 }}>{item.qty}</Typography>
+                          <Typography sx={{ mx: 2 }}>{qty}</Typography>
                           <IconButton
                             color="primary"
-                            onClick={() => incrementQty(item.product, item.qty)}
+                            onClick={() =>
+                              incrementQty(item.product, item.qty)
+                            }
                           >
                             <Add />
                           </IconButton>
@@ -122,7 +136,9 @@ function CartScreen() {
                       <TableCell align="center">
                         <IconButton
                           color="error"
-                          onClick={() => removeFromCartHandler(item.product)}
+                          onClick={() =>
+                            removeFromCartHandler(item.product)
+                          }
                         >
                           <DeleteIcon />
                         </IconButton>
